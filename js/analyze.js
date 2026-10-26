@@ -104,14 +104,15 @@ function valueAt(N, D, root) {
 
 const word = k => ['zero', 'one', 'two', 'three', 'four', 'five', 'six'][k] || `${k}`;
 const andList = xs => (xs.length <= 1 ? xs.join('') : xs.length === 2 ? `${xs[0]} and ${xs[1]}` : `${xs.slice(0, -1).join(', ')}, and ${xs[xs.length - 1]}`);
-const pt = (a, b) => `(${a}, ${b})`;
+// Parentheses and brackets that grow to fit fractions: \left( \frac{5}{6} \right)
+const pt = (a, b) => `\\left(${a}, ${b}\\right)`;
 
 // Interval notation for the domain with the excluded x-values removed.
 function domainTex(xs) {
   if (!xs.length) return `(-${INF}, ${INF})`;
   const pts = [`-${INF}`, ...xs.map(e => e.tex), INF];
   const parts = [];
-  for (let i = 0; i + 1 < pts.length; i++) parts.push(`(${pts[i]}, ${pts[i + 1]})`);
+  for (let i = 0; i + 1 < pts.length; i++) parts.push(pt(pts[i], pts[i + 1]));
   return parts.join(' \\cup ');
 }
 
@@ -198,7 +199,7 @@ export function analyzeFunction(src) {
     } else {
       steps.push(`Use the <b>original</b> denominator (before canceling anything). Set it equal to 0: $${toTex(factored(D0, v))} = 0$`);
       steps.push(`Solve: $${excluded.map(e => `${V} = ${e.tex}`).join(',\\ ')}$`);
-      steps.push(`These make the function undefined, so leave them out: $\\{${V} \\mid ${V} \\neq ${excluded.map(e => e.tex).join(', ')}\\}$`);
+      steps.push(`These make the function undefined, so leave them out: $\\left\\{${V} \\mid ${V} \\neq ${excluded.map(e => e.tex).join(', ')}\\right\\}$`);
       answer = `$${domainTex(excluded)}$`;
     }
     features.push({
@@ -405,7 +406,7 @@ export function analyzeFunction(src) {
       steps.push(`After canceling, $${F} = ${toTex(polyToNode(N, v))}$ with ${holes.length > 1 ? 'holes' : 'a hole'}. The graph <b>is</b> that ${n === 1 ? 'line' : 'curve'}; it doesn't approach a line from the side, so there is no slant asymptote.`);
     } else if (k === 1) {
       const { q, r, lines } = longDivision(N, D, v);
-      steps.push(`The top's degree is exactly one more than the bottom's, so divide: $(${toTex(polyToNode(N, v))}) \\div (${toTex(polyToNode(D, v))})$`);
+      steps.push(`The top's degree is exactly one more than the bottom's, so divide: $\\left(${toTex(polyToNode(N, v))}\\right) \\div \\left(${toTex(polyToNode(D, v))}\\right)$`);
       steps.push(...lines);
       const rem = deg(r) === -Infinity ? '' : ` + \\dfrac{${toTex(polyToNode(r, v))}}{${toTex(polyToNode(D, v))}}`;
       steps.push(`So $${F} = ${toTex(polyToNode(q, v))}${rem}$. The leftover fraction shrinks to 0 far out, so the graph approaches the line $y = ${toTex(polyToNode(q, v))}$.`);
@@ -435,10 +436,37 @@ export function analyzeFunction(src) {
     data.turning = r.turning;
   }
 
+  for (const f of features) f.intro = INTROS[f.id](isPoly, V);
+
   return {
     v, name, F, inputTex: `${F} = ${toTex(node)}`, features, data, isPoly, f: fF,
   };
 }
+
+// What each feature means and how to find it, shown at the top of its dropdown.
+const INTROS = {
+  form: poly => (poly
+    ? 'Factored form shows the zeros right away: each factor $(x - a)$ gives a zero at $x = a$, and its exponent is the multiplicity. Standard form (highest power first) shows the leading term, which decides the end behavior.'
+    : 'Factor before anything else. The top\'s factors give the zeros; the bottom\'s factors give the vertical asymptotes and holes. A factor on both the top and the bottom cancels, and where it was becomes a hole (unless the bottom still has more copies of it).'),
+  domain: poly => (poly
+    ? 'The domain is every $x$-value you are allowed to plug in. Polynomials only add, subtract, and multiply, and you can do that with any number.'
+    : 'The domain is every $x$-value you are allowed to plug in. With a fraction, the only problem is dividing by zero, so remove every $x$ that makes the <b>original</b> denominator 0. Even if a factor cancels later, that $x$ is still not allowed.'),
+  holes: () => 'A hole is one missing point. It happens when a factor cancels completely from the top and bottom: the graph looks just like the simplified function, but that one $x$-value is still not allowed. On the graph it is an open circle.',
+  va: () => 'A vertical asymptote is a vertical line $x = a$ that the graph gets closer and closer to while shooting up or down. It happens where the simplified denominator is 0 (and the numerator is not). The graph never touches it. The multiplicity tells you what the two sides do: odd means opposite directions, even means the same direction.',
+  yint: () => 'The $y$-intercept is where the graph crosses the $y$-axis. Every point on the $y$-axis has $x = 0$, so plug in $x = 0$. A function has at most one $y$-intercept, and none if $x = 0$ is not in the domain.',
+  zeros: poly => (poly
+    ? 'Zeros are the $x$-values that make $f(x) = 0$: the places where the graph meets the $x$-axis. Set each factor equal to 0. The multiplicity is how many times a factor repeats (its exponent), and it tells you what the graph does at that zero.'
+    : 'Zeros are the $x$-values that make $f(x) = 0$: the places where the graph meets the $x$-axis. A fraction is 0 only when its top is 0 and its bottom is not, so use the <b>simplified</b> numerator. The multiplicity is how many times a factor repeats, and it tells you what the graph does at that zero.'),
+  parity: () => 'An <b>even</b> function is a mirror image across the $y$-axis: $f(-x) = f(x)$, like $x^2$. An <b>odd</b> function looks the same after a half turn around the origin: $f(-x) = -f(x)$, like $x^3$. Most functions are neither. To test, plug in $-x$ and simplify.',
+  end: poly => (poly
+    ? 'End behavior is what the $y$-values do on the far left ($x \\to -\\infty$) and far right ($x \\to \\infty$). Far from the origin, the leading term is so much bigger than the others that it decides everything: its degree (even or odd) and the sign of its coefficient tell you where each end goes.'
+    : 'End behavior is what the $y$-values do on the far left ($x \\to -\\infty$) and far right ($x \\to \\infty$). Far from the origin, the leading terms of the top and bottom are so much bigger than the rest that they decide everything. The graph either levels off at a number (a horizontal asymptote) or keeps going up or down.'),
+  ha: () => 'A horizontal asymptote is a horizontal line $y = b$ that the graph levels off toward on the far left and far right. Compare degrees: bottom bigger gives $y = 0$; equal degrees give the ratio of the leading coefficients; top bigger gives none. It only describes the ends, so the graph <b>can</b> cross it in the middle.',
+  slant: () => 'When the top\'s degree is exactly one more than the bottom\'s, the graph approaches a slanted line instead of a horizontal one. Long division splits $f(x)$ into a line plus a leftover fraction. Far out, the leftover fraction shrinks to 0, so the graph hugs the line.',
+  range: poly => (poly
+    ? 'The range is every $y$-value the graph reaches. Check where the two ends go and find the highest or lowest turning point. An odd-degree polynomial reaches every $y$-value; an even-degree one stops at its lowest (or highest) point.'
+    : 'The range is every $y$-value the graph reaches. Look at each piece of the graph between vertical asymptotes: where its ends go, its turning points (highest and lowest points), and any $y$-value a hole leaves out.'),
+};
 
 const BEHAVIOR_TEXT = {
   crosses: 'crosses the $x$-axis',
@@ -462,7 +490,7 @@ function longDivision(N, D, v) {
     const t = termTex(c, e);
     const before = r;
     r = padd(r, pscale(prod, num(-1)));
-    lines.push(`Divide the leading terms: $\\dfrac{${termTex(lead(before), deg(before))}}{${termTex(lead(D), deg(D))}} = ${t}$. Multiply: $${t.startsWith('-') ? `(${t})` : t}(${Dt}) = ${toTex(polyToNode(prod, v))}$. Subtract: remainder $${toTex(polyToNode(r, v))}$`);
+    lines.push(`Divide the leading terms: $\\dfrac{${termTex(lead(before), deg(before))}}{${termTex(lead(D), deg(D))}} = ${t}$. Multiply: $${t.startsWith('-') ? `\\left(${t}\\right)` : t}\\left(${Dt}\\right) = ${toTex(polyToNode(prod, v))}$. Subtract: remainder $${toTex(polyToNode(r, v))}$`);
   }
   return { q: trim(q), r, lines };
 }
@@ -490,7 +518,7 @@ function rangeOf({ N, D, fF, vas, holes, endL, endR, isExcluded, excluded, v, is
     const y = surdValue(r, proots, fF) || valueAt(N, D, r);
     turning.push({ x: r.x, xTex: r.tex, xExact: r.exact, y, hole: isExcluded(r.x) });
   }
-  const tpTex = t => `(${t.xExact ? t.xTex : `\\approx ${t.xTex}`}, ${approxTex(t.y)})`;
+  const tpTex = t => pt(t.xExact ? t.xTex : `\\approx ${t.xTex}`, approxTex(t.y));
 
   const bounds = [{ x: -Infinity }, ...vas, { x: Infinity }];
   const lim = s => (s > 0 ? { val: Infinity, tex: '\\infty' } : { val: -Infinity, tex: '-\\infty' });
@@ -544,7 +572,7 @@ function rangeOf({ N, D, fF, vas, holes, endL, endR, isExcluded, excluded, v, is
       others = numericPolyRoots(c).filter(x => !isExcluded(x)).filter(x => Math.abs(fF(x) - y) < 1e-6).map(x => ({ x }));
     }
     if (others.length) {
-      steps.push(`The hole at $(${h.tex}, ${h.y.tex})$ doesn't remove $y = ${h.y.tex}$: the graph reaches that height somewhere else.`);
+      steps.push(`The hole at $${pt(h.tex, h.y.tex)}$ doesn't remove $y = ${h.y.tex}$: the graph reaches that height somewhere else.`);
       continue;
     }
     const iv = intervals[inside];
@@ -552,7 +580,7 @@ function rangeOf({ N, D, fF, vas, holes, endL, endR, isExcluded, excluded, v, is
     if (iv.lo < y && !near(iv.lo, y)) split.push({ ...iv, hi: y, hiTex: h.y.tex, hiClosed: false });
     if (iv.hi > y && !near(iv.hi, y)) split.push({ ...iv, lo: y, loTex: h.y.tex, loClosed: false });
     intervals = [...intervals.slice(0, inside), ...split, ...intervals.slice(inside + 1)];
-    steps.push(`The hole at $(${h.tex}, ${h.y.tex})$ removes $y = ${h.y.tex}$: the graph never reaches that height anywhere else.`);
+    steps.push(`The hole at $${pt(h.tex, h.y.tex)}$ removes $y = ${h.y.tex}$: the graph never reaches that height anywhere else.`);
   }
 
   const tex = intervals.map(intervalTex).join(' \\cup ');
@@ -583,12 +611,12 @@ function surdValue(r, roots, fF) {
 function intervalX(a, b) {
   const l = a.x === -Infinity ? '-\\infty' : a.tex;
   const r = b.x === Infinity ? '\\infty' : b.tex;
-  return `(${l}, ${r})`;
+  return pt(l, r);
 }
 
 function intervalTex(iv) {
   if (near(iv.lo, iv.hi) && isFinite(iv.lo)) return `\\{${iv.loTex}\\}`;
-  return `${iv.loClosed ? '[' : '('}${iv.loTex}, ${iv.hiTex}${iv.hiClosed ? ']' : ')'}`;
+  return `\\left${iv.loClosed ? '[' : '('}${iv.loTex}, ${iv.hiTex}\\right${iv.hiClosed ? ']' : ')'}`;
 }
 
 function mergeIntervals(list) {

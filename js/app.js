@@ -79,18 +79,9 @@ function render() {
   if (!r) return;
   $('results').hidden = false;
   $('results').classList.toggle('predicting', state.predict);
-  $('fn-title').innerHTML = M(`\\displaystyle ${r.inputTex}`);
-  renderSummary(r);
   renderFeatures(r);
   renderGraph(r);
   updateScore();
-}
-
-function renderSummary(r) {
-  const rows = r.features.filter(f => f.id !== 'form').map(f =>
-    `<tr><th>${esc(f.title)}</th><td>${md(f.answer)}</td></tr>`).join('');
-  const kind = r.isPoly ? 'Polynomial' : 'Rational function';
-  $('summary').innerHTML = `<p class="kind">${kind}: ${md(r.features[0].answer)}</p><div class="table-wrap"><table class="summary">${rows}</table></div>`;
 }
 
 function renderFeatures(r) {
@@ -101,7 +92,8 @@ function renderFeatures(r) {
       <div class="feat-head"><span class="num">${i + 1}</span><h3>${esc(f.title)}</h3></div>
       ${hide ? predictBox(f) : `<div class="feat-answer">${md(multPending(f) ? f.shortAnswer : f.answer)}</div>`}
       ${hide ? '' : zerosTable(f, r)}
-      <details class="feat-steps"${hide || multPending(f) ? ' hidden' : ''}><summary>Show steps</summary>
+      <details class="feat-steps"${hide || multPending(f) ? ' hidden' : ''}><summary>Explanation and steps</summary>
+        <p class="intro">${md(f.intro)}</p>
         <ol>${f.steps.map(s => `<li>${md(s)}</li>`).join('')}</ol>
       </details>
     </section>`;

@@ -46,7 +46,7 @@ check('HA range', range(d), '[0,2)');
 d = A('(x^2+1)/(x-1)');
 check('slant', d.slant.tex, 'x + 1');
 check('slant no HA', d.ha, null);
-check('slant range exact', analyzeFunction('(x^2+1)/(x-1)').data.rangeTex, '(-\\infty, 2 - 2 \\sqrt{2}] \\cup [2 + 2 \\sqrt{2}, \\infty)');
+check('slant range exact', analyzeFunction('(x^2+1)/(x-1)').data.rangeTex, '\\left(-\\infty, 2 - 2 \\sqrt{2}\\right] \\cup \\left[2 + 2 \\sqrt{2}, \\infty\\right)');
 check('HA crossing function range', range(A('x/(x^2-1)')), '(-Infinity,Infinity)');
 check('HA below', range(A('1/(x^2+1)')), '(0,1]');
 check('fraction HA', A('(x+1)/(2x-4)').ha.tex, '\\frac{1}{2}');
@@ -80,7 +80,7 @@ check('constant', range(A('5')), '[5,5]');
 
 // y-intercepts and domain
 check('y-int', A('(x+1)/(2x-4)').yint.tex, '-\\frac{1}{4}');
-check('domain', answer('x/(x^2-1)', 'domain'), '$(-\\infty, -1) \\cup (-1, 1) \\cup (1, \\infty)$');
+check('domain', answer('x/(x^2-1)', 'domain'), '$\\left(-\\infty, -1\\right) \\cup \\left(-1, 1\\right) \\cup \\left(1, \\infty\\right)$');
 check('named variable', A('f(t) = t^2/(t+1)').vas.map(a => a.x), [-1]);
 check('y = form', A('y = 3x/(x^2-4)').vas.map(a => a.x), [-2, 2]);
 

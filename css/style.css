@@ -237,15 +237,9 @@ canvas#graph { width: 100%; height: 100%; display: block; touch-action: none; cu
 .switch input { width: 18px; height: 18px; accent-color: var(--accent); }
 
 .results { display: flex; flex-direction: column; }
-.results.predicting #summary-card { display: none; }
 .results.predicting #graph-card { order: 2; }
 .results.predicting #steps-card { order: 1; }
 
-.kind { margin: 0 0 10px; font-size: 1.05rem; overflow-x: auto; overflow-y: hidden; }
-table.summary { border-collapse: collapse; width: 100%; font-size: 0.97rem; }
-table.summary th, table.summary td { border-top: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
-table.summary th { width: 34%; font-weight: 600; color: var(--muted); white-space: nowrap; }
-#fn-title { overflow-x: auto; overflow-y: hidden; font-size: 1.2rem; font-weight: 400; }
 
 .feature { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
 .feature.solved.just-right { border-color: var(--inc); background: #f7fdf9; }
@@ -284,6 +278,6 @@ table.summary th { width: 34%; font-weight: 600; color: var(--muted); white-spac
 
 @media (max-width: 600px) {
   .feat-answer, .feat-steps, .predict-box { margin-left: 0; }
-  table.summary th { white-space: normal; width: 40%; }
-  .card-head { flex-wrap: wrap; }
+    .card-head { flex-wrap: wrap; }
 }
+.feat-steps .intro { background: var(--accent-soft); border-radius: 8px; padding: 10px 12px; margin: 8px 0 4px; line-height: 1.6; }
