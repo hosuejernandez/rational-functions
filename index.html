@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rational Functions Explorer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Rational Functions Explorer</h1>
+      <p>Type a polynomial or a rational function. See its intercepts, zeros, symmetry, end behavior, holes, asymptotes, domain and range, step by step, with a graph.</p>
+    </header>
+
+    <section class="card input-card">
+      <label class="field-label" for="expr">Function</label>
+      <div class="input-row">
+        <input id="expr" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+          placeholder="e.g.  x^3 - x     (x^2 - 4)/(x - 2)     f(x) = (x^2 + 1)/(x - 1)">
+        <button id="go" class="primary">Analyze</button>
+      </div>
+      <div class="keypad" id="keypad" aria-label="Insert math">
+        <button data-insert="x">x</button>
+        <button data-insert="^2">x²</button>
+        <button data-insert="^">xⁿ</button>
+        <button data-insert="(" data-close=")">( )</button>
+        <button data-insert="(" data-close=")/()">a/b</button>
+        <button data-insert="/">÷</button>
+      </div>
+      <div id="preview" class="preview" aria-live="polite"></div>
+      <p class="hint">Use <code>^</code> for powers and <code>/</code> for the fraction bar. Put parentheses around the whole top and the whole bottom: <code>(x^2 - 4)/(x - 2)</code>.</p>
+
+      <div class="options">
+        <label class="examples">Examples:
+          <select id="examples"></select>
+        </label>
+        <label class="switch"><input type="checkbox" id="predict"> <span>Predict mode</span></label>
+      </div>
+      <p id="predict-hint" class="hint" hidden>Predict mode: answer each part yourself, then press <b>Check</b>. Press <b>Show answer</b> any time to see the work.</p>
+    </section>
+
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <div id="results" class="results" hidden>
+      <section id="summary-card" class="card">
+        <h2 id="fn-title"></h2>
+        <div id="summary"></div>
+      </section>
+
+      <section id="graph-card" class="card">
+        <h2>Graph</h2>
+        <div id="graph-cover" class="graph-cover" hidden>
+          <p>Make your predictions first, then look at the graph to see if they match.</p>
+          <button id="show-graph" class="primary">Show graph</button>
+        </div>
+        <div id="graph-body">
+          <div class="legend">
+            <span><i style="background:#2563eb"></i>graph</span>
+            <span><i class="dash"></i>asymptote</span>
+            <span><b class="dot" style="background:#15803d"></b>zero</span>
+            <span><b class="dot" style="background:#7c3aed"></b>y-intercept</span>
+            <span><b class="dot open"></b>hole</span>
+            <span><b class="dot" style="background:#64748b"></b>turning point</span>
+          </div>
+          <div class="graph-wrap"><canvas id="graph" aria-label="Graph of the function"></canvas></div>
+          <div id="readout" class="readout"></div>
+          <div class="row-actions graph-controls">
+            <button id="zoom-in" aria-label="Zoom in">＋</button>
+            <button id="zoom-out" aria-label="Zoom out">－</button>
+            <button id="zoom-reset">Reset view</button>
+            <label class="check"><input type="checkbox" id="show-asym" checked> Asymptotes</label>
+            <label class="check"><input type="checkbox" id="show-labels" checked> Labels</label>
+          </div>
+        </div>
+      </section>
+
+      <section id="steps-card" class="card">
+        <div class="card-head">
+          <h2>Step by step</h2>
+          <span id="score" class="score" hidden></span>
+          <button id="expand-all" class="ghost">Show all steps</button>
+        </div>
+        <div id="features"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
